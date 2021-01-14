@@ -8,6 +8,15 @@ BITS 64
 
 segment .text
 
+fabs:
+    pxor xmm1, xmm1
+    comisd xmm0, xmm1
+    ja .skip
+    movsd xmm1, QWORD [mzero]
+    pxor xmm0, xmm1
+.skip:
+    ret
+
 ;; xmm0 - input
 ;; xmm0 - output
 frac:
@@ -35,6 +44,22 @@ floor:
 
 print_int:
     ;; rax contains the value we need to print
+
+    cmp rax, 0
+    jge .skip_negative
+    
+    push rax
+    mov BYTE [x], '-'
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
+    mov rsi, x
+    mov rdx, 1
+    syscall
+    pop rax
+
+    neg rax
+
+.skip_negative:
     ;; rdi is the counter of chars
     mov rdi, 0
 .loop:
@@ -184,12 +209,12 @@ print_frac:
     ret
 
 ;; xmm0
-;; TODO: print_f64 does not support negative numbers
 print_f64:
     cvttsd2si rax, xmm0
     call print_int
 
     call frac
+    call fabs
     call print_frac
 
     mov BYTE [x], 10
@@ -211,11 +236,12 @@ _start:
     syscall
 
 segment .data
+mzero: dq -0.0
 one:   dq 1.0
 half:  dq 0.5
 ten:   dq 10.0
 tenth: dq 0.1
-pi:    dq 3.141592653589
+pi:    dq -3.141592653589
 
 segment .bss
 x: resb 1
