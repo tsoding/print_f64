@@ -209,6 +209,8 @@ print_frac:
     ret
 
 ;; xmm0
+;; TODO: print_f64 does not support NaN and +-Inf
+;; TODO: print_f64(-0.0) prints 0.0
 print_f64:
     cvttsd2si rax, xmm0
     call print_int
@@ -237,6 +239,7 @@ _start:
 
 segment .data
 mzero: dq -0.0
+zero:  dq 0.0
 one:   dq 1.0
 half:  dq 0.5
 ten:   dq 10.0
