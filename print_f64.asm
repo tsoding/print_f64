@@ -11,29 +11,23 @@ segment .text
 ;; xmm0 - input
 ;; xmm0 - output
 frac:
-    sub rsp, 16
-    movsd [rsp], xmm0
-
-    ;; frac(3.1415) == 0.1415
-    ;; frac(x) = x - floor(x)
-
-    call floor
-    movsd xmm1, [rsp]
-    subsd xmm1, xmm0
-    movsd xmm0, xmm1
-
-    add rsp, 16
+    ;; frac(x) = x - trunc(x)
+    movsd xmm1, xmm0
+    cvttsd2si rax, xmm1
+    cvtsi2sd xmm1, rax
+    subsd xmm0, xmm1
     ret
 
 ;; xmm0 - input
 ;; xmm0 - output
-;; ---
-;; TODO: bug `floor(-420.0) == -421.0`
 floor:
     cvttsd2si rax, xmm0
+    cvtsi2sd xmm1, rax
+    subsd xmm0, xmm1
+
     pxor xmm1, xmm1
     comisd xmm0, xmm1
-    ja .skipdec
+    jae .skipdec
     dec rax
 .skipdec:
     cvtsi2sd xmm0, rax
