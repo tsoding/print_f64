@@ -7,9 +7,15 @@ print_f64 implementation purely in assembly without using any 3rd party dependen
 Build dependencies:
 - [nasm](https://www.nasm.us/)
 
+Build:
 ```console
 $ ./build.sh
 $ ./print_f64
+```
+
+Debug:
+```console
+$ gdb ./print_f64 -x ./tools/debug.gdb
 ```
 
 ## References
